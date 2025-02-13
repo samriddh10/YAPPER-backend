@@ -9,7 +9,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 require("dotenv").config();
 
 // Initialize Firebase Admin
-const serviceAccount = require("./yapperdotcom-firebase-adminsdk-fbsvc-f0e2db942b.json");
+const serviceAccount = require("./yapperdotcom-firebase-adminsdk-fbsvc-73e376b657.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
