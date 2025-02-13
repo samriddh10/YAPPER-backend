@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -7,6 +6,7 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
+require("dotenv").config();
 
 // Initialize Firebase Admin
 const serviceAccount = require("./yapperdotcom-firebase-adminsdk-fbsvc-f0e2db942b.json");
@@ -25,16 +25,16 @@ cloudinary.config({
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 const io = new Server(server, {
   cors: {
-    origin: `http://localhost:5173`,
+    origin: "*", // Allow all origins
     methods: ["GET", "POST"],
   },
 });
 
-app.use(cors());
+// CORS Middleware (Allow all origins)
+app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
 app.use(express.json());
 
 // Multer Setup for File Uploads
