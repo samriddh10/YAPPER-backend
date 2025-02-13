@@ -26,22 +26,34 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 
+// Socket.io Setup with CORS
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-// CORS Middleware (Allow all origins)
-app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
+// ✅ Proper CORS Middleware
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 // Multer Setup for File Uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Upload Image Route
+// ✅ Upload Image Route (Fixed)
 app.post("/upload", upload.single("photo"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -49,7 +61,7 @@ app.post("/upload", upload.single("photo"), async (req, res) => {
     const userId = req.body.userId;
     if (!userId) return res.status(400).json({ error: "User ID is required" });
 
-    // Convert Cloudinary upload_stream into a Promise
+    // Cloudinary upload as a Promise
     const uploadToCloudinary = () =>
       new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
@@ -75,10 +87,12 @@ app.post("/upload", upload.single("photo"), async (req, res) => {
   }
 });
 
+// Default Route
 app.get("/", (req, res) => {
   res.send("Real-Time Chat Server is running...");
 });
 
+// ✅ WebSockets with Socket.io
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
@@ -92,4 +106,7 @@ io.on("connection", (socket) => {
   });
 });
 
+// Start Server
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = app; // Required for Vercel Deployment
